@@ -24,7 +24,7 @@ public class TransactionBean {
 	
 	public void setTransaction_id(int transaction_id) {
 		this.transaction_id = transaction_id;
-	}
+	}	
 	
 	public String getUsername() {
 		return username;
