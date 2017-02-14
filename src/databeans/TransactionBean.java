@@ -11,7 +11,7 @@ import org.genericdao.PrimaryKey;
 public class TransactionBean {
 	
 	private int transaction_id;
-	private int customer_id;
+	private String username;
 	private int fund_id;
 	private Date execute_date = null;
 	private double shares = 0.0;
@@ -24,16 +24,16 @@ public class TransactionBean {
 	
 	public void setTransaction_id(int transaction_id) {
 		this.transaction_id = transaction_id;
-	}
+	}	
 	
-	public int getCustomer_id() {
-		return customer_id;
+	public String getUsername() {
+		return username;
 	}
-	
-	public void setCustomer_id(int customer_id) {
-		this.customer_id = customer_id;
+
+	public void setUsername(String username) {
+		this.username = username;
 	}
-	
+
 	public int getFund_id() {
 		return fund_id;
 	}
