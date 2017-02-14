@@ -67,6 +67,7 @@ public class BuyFund extends Action{
 			
 			TransactionBean tBean = new TransactionBean();
 			tBean.setUsername(username);
+			//have not set up function to check system time for transaction date.
 			tBean.setFund_id(fund.getFund_id());
 			tBean.setTransaction_type("buy");
 			tBean.setAmount(Double.parseDouble(form.getCashValue()));
