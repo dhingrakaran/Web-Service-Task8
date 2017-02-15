@@ -2,26 +2,26 @@ package databeans;
 
 import org.genericdao.PrimaryKey;
 
-@PrimaryKey("customer_id,fund_id")
+@PrimaryKey("username,symbol")
 public class Position {
-    private int customer_id;
-    private int fund_id;
+    private String username;
+    private String symbol;
     private double shares;
     
-    public int getCustomer_id() {
-        return customer_id;
+    public String getUsername() {
+        return username;
     }
     
-    public void setCustomer_id(int customer_id) {
-        this.customer_id = customer_id;
+    public void setUsername(String username) {
+        this.username = username;
     }
     
-    public int getFund_id() {
-        return fund_id;
+    public String getSymbol() {
+        return symbol;
     }
     
-    public void setFund_id(int fund_id) {
-        this.fund_id = fund_id;
+    public void setSymbol(String symbol) {
+        this.symbol = symbol;
     }
     
     public double getShares() {

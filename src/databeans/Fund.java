@@ -2,19 +2,11 @@ package databeans;
 
 import org.genericdao.PrimaryKey;
 
-@PrimaryKey ("fund_id")
+@PrimaryKey ("symbol")
 public class Fund {
-	private int fund_id;
-	private String name = null;
 	private String symbol = null;
-	
-	public int getFund_id() {
-		return fund_id;
-	}
-	
-	public void setFund_id(int fund_id) {
-		this.fund_id = fund_id;
-	}
+	private String name = null;
+	private double initial_value; 
 	
 	public String getName() {
 		return name;
@@ -30,5 +22,13 @@ public class Fund {
 	
 	public void setSymbol(String symbol) {
 		this.symbol = symbol;
+	}
+
+	public double getInitial_value() {
+		return initial_value;
+	}
+
+	public void setInitial_value(double initial_value) {
+		this.initial_value = initial_value;
 	}
 }
