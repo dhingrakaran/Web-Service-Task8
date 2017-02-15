@@ -13,6 +13,15 @@ public class RequestCheckForm extends FormBean {
 	public void setCashValue(String cashValue) {
 		this.cashValue = trimAndConvert(cashValue, "<>\"");
 	}
+	
+	public double getAmountAsDouble() {
+    	try {
+            Double amountAsDouble = Double.parseDouble(cashValue);
+            return Math.round(amountAsDouble*100.0)/100.0;
+        } catch (NumberFormatException e) {
+            return -1;
+        }    
+    }
 
 	public boolean hasErrors() {
 
