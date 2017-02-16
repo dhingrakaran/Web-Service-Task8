@@ -35,21 +35,24 @@ public class CreateCustomerAccount extends Action {
     @Override
     public String perform(HttpServletRequest request) {
         JsonObject obj = new JsonObject();
+        HttpSession session = request.getSession();
+        if (session.getAttribute("employee") == null && session.getAttribute("customer") == null) {
+            obj.addProperty("message", "You are not currently logged in");
+            return obj.toString();
+        }
         BufferedReader br;
         CreateCustomerAccountForm form = null;
-        HttpSession session = request.getSession();
+        
         try {
             br = request.getReader();
             String line;
             line = br.readLine();
             Gson gson = new Gson();
             form = gson.fromJson(line, CreateCustomerAccountForm.class);
-            if (session.getAttribute("employee") == null && session.getAttribute("customer") == null) {
-                obj.addProperty("message", "You are not currently logged in");
-                return obj.toString();
-            }
+            
             if (session.getAttribute("employee") == null && session.getAttribute("customer") != null) {
                 obj.addProperty("message", "You must be an employee to perform this action");
+                return obj.toString();
             }
             if (form.hasErrors()) {
                 obj.addProperty("message", "The input you provided is not valid");
@@ -68,7 +71,8 @@ public class CreateCustomerAccount extends Action {
             customer.setCash(form.getCashAsDouble());
             customer.encodePassword(form.getPassword());
             customerDAO.create(customer);
-            obj.addProperty("message", "fname was registered successfully");
+            String fname = customer.getFname();
+            obj.addProperty("message", fname + " was registered successfully");
             
             
         } catch(DuplicateKeyException e) {
