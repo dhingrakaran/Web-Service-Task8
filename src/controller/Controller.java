@@ -43,6 +43,8 @@ public class Controller extends HttpServlet {
         Action.add(new TransitionDay(model));
         Action.add(new CreateCustomerAccount(model));
         Action.add(new ViewPortfolio(model));
+        Action.add(new DepositCheck(model));
+        Action.add(new CreateFund(model));
     }
 
 	/**
