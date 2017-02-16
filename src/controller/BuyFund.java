@@ -49,8 +49,14 @@ public class BuyFund extends Action{
 			//Assuming here we already have customer ID.
 			String username = "team4";
 			Customer customer = customerDAO.read(username);
+			//I need to check if customer exists.
+			if(customer != null) {
+				obj.addProperty("message", "You are not currently logged in");
+				return obj.toString();
+			}
 			if (customer.getCash() < Integer.parseInt(form.getCashValue())) {
 				obj.addProperty("message", "You don’t have enough cash in your account to make this purchase");
+				return obj.toString();
 			}
 			
 			Fund fund = fundDAO.readSymbol(form.getSymbol());
@@ -68,6 +74,11 @@ public class BuyFund extends Action{
 //			tBean.setTransaction_type("buy");
 //			tBean.setAmount(Double.parseDouble(form.getCashValue()));
 //			transactionDAO.create(tBean);
+			
+			double newCash = customer.getCash() - Double.parseDouble(form.getCashValue());
+			customerDAO.updateCash(customer.getUsername(), newCash);
+			//fund.getInitial_value()
+			
 			
 			obj.addProperty("message", "The fund has been successfully purchased");
 			
