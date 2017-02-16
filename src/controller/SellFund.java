@@ -4,6 +4,7 @@ import java.io.BufferedReader;
 import java.io.IOException;
 
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpSession;
 
 import org.genericdao.MatchArg;
 import org.genericdao.RollbackException;
@@ -38,7 +39,7 @@ public class SellFund extends Action{
 	public String perform (HttpServletRequest request) {
 		JsonObject obj = new JsonObject();
 		BufferedReader bReader;
-		
+		HttpSession session = request.getSession();
 		try {
 			bReader = request.getReader();
 			String line;
@@ -46,14 +47,21 @@ public class SellFund extends Action{
 			line = bReader.readLine();
 			SellFundForm form = gson.fromJson(line, SellFundForm.class);
 			System.out.println(form.getSymbol() + " " + form.getNumShares());
+			
+			if (session.getAttribute("customer") == null && session.getAttribute("customer") == null) {
+                obj.addProperty("message", "You are not currently logged in");
+                return obj.toString();
+            }
+			
 			if (form.hasErrors()) {
 				obj.addProperty("message", "The input you provided is not valid");
 			}
 			
 			//get Customer fund cash.
 			//Assuming here we already have customer ID.
-			String username = "team4";
-			Customer customer = customerDAO.read(username);
+			
+			Customer customer = (Customer) session.getAttribute("customer");
+			String username = customer.getUsername();
 			
 			//get number of shares owned by this customer.
 			Fund fund = fundDAO.readSymbol(form.getSymbol());
@@ -70,7 +78,7 @@ public class SellFund extends Action{
 			}
 			
 			if (position[0].getShares() < Double.parseDouble(form.getNumShares())) {
-				obj.addProperty("message", "You don’t have enough cash in your account to make this purchase");
+				obj.addProperty("message", "You don’t have that many shares in your portfolio");
 			}
 			
 			//we don't have transaction table now
@@ -83,7 +91,12 @@ public class SellFund extends Action{
 //			tBean.setTransaction_type("sell");
 //			tBean.setAmount(Double.parseDouble(form.getNumShares()));
 //			transactionDAO.create(tBean);
-//			
+			
+			double newCash = customer.getCash() + Double.parseDouble(form.getNumShares()) * fund.getInitial_value();
+			customerDAO.updateCash(username, newCash);
+			double newShare = position[0].getShares() - Double.parseDouble(form.getNumShares());
+			positionDAO.updateShares(line, newShare);
+			
 			obj.addProperty("message", "The fund has been successfully sold");
 			
 		} catch (IOException e) {
