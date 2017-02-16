@@ -40,7 +40,7 @@ public class RequestCheck {
 			if (customers.length == 0) obj.addProperty("message", "You must be a customer to perform this action");
 			Customer customer = customers[0];
 			
-			//we don't have pending transactions now so this is nto required.
+			//we don't have pending transactions now so this is not required.
 //			double balance = customer.getCash();
 //			TransactionBean[] transactions = transactionDAO.match(MatchArg.and(MatchArg.equals("username", username), MatchArg.equals("execute_date", null)));
 //            for(int i = 0; i < transactions.length; ++i) {
