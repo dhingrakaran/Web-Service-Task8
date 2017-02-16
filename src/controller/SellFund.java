@@ -46,7 +46,7 @@ public class SellFund extends Action{
             return obj.toString();
         }
 		//if someone is there but not customer.
-		if (session.getAttribute("customer") == null ) {
+		if (session.getAttribute("customer") == null) {
 			obj.addProperty("message", "You must be a customer to perform this action");
             return obj.toString();
 		}
@@ -57,31 +57,16 @@ public class SellFund extends Action{
 			Gson gson = new Gson();
 			line = bReader.readLine();
 			SellFundForm form = gson.fromJson(line, SellFundForm.class);
-			System.out.println(form.getSymbol() + " " + form.getNumShares());
-			
 
-			
 			if (form.hasErrors()) {
 				obj.addProperty("message", "The input you provided is not valid");
 			}
-			
-			//get Customer fund cash.
-			//Assuming here we already have customer ID.
-			
 			
 			String username = (String) session.getAttribute("customer");  
 			//use CustomeDAO to get customer bean
 			Customer customer = customerDAO.read(username);
 			
-			//get number of shares owned by this customer.
-			Fund fund = fundDAO.readSymbol(form.getSymbol());
-			if (fund == null) {
-				obj.addProperty("message", "The input you provided is not valid");
-				return obj.toString();
-			}
-			
-			Position[] position = positionDAO.match(MatchArg.and(MatchArg.equals("username", username), 
-					MatchArg.equals("fund_id", fundDAO.readSymbol(form.getSymbol()))));
+			Position[] position = positionDAO.match(MatchArg.and(MatchArg.equals("username", username), MatchArg.equals("symbol", form.getSymbol())));
 			if (position.length == 0) {
 				// customer doesn't own this fund.
 				obj.addProperty("message", "The input you provided is not valid");
@@ -91,27 +76,22 @@ public class SellFund extends Action{
 			int noofSellableFund = Integer.parseInt(form.getNumShares());
 			
 			if (position[0].getShares() < noofSellableFund) {
-				obj.addProperty("message", "You don’t have that many shares in your portfolio");
+				obj.addProperty("message", "You don't have that many shares in your portfolio");
 				return obj.toString();
 			}
 			
+			Fund fund = fundDAO.read(form.getSymbol());
 			double newCash = customer.getCash() + noofSellableFund * fund.getInitial_value();
 			customer.setCash(newCash);
 			customerDAO.update(customer); 
 			
 			if (noofSellableFund == position[0].getShares()) {
-				
-				positionDAO.delete(position);
-				
-				obj.addProperty("message", "The fund has been successfully sold");
-				return obj.toString();
+				positionDAO.delete(position[0]);
+			} else {
+				double newShare = position[0].getShares() - noofSellableFund;
+				position[0].setShares(newShare);
+				positionDAO.update(position[0]);
 			}
-
-			//what if customer sells it all? do we delete it?
-			
-			double newShare = position[0].getShares() - noofSellableFund;
-			position[0].setShares(newShare);
-			positionDAO.update(position[0]);
 			
 			obj.addProperty("message", "The fund has been successfully sold");
 			
@@ -119,10 +99,8 @@ public class SellFund extends Action{
 			obj.addProperty("message", "The input you provided is not valid");
 		} catch (RollbackException e) {
 			obj.addProperty("message", "The input you provided is not valid");
-		} catch (NullPointerException e) {
-			obj.addProperty("message", "The input you provided is not valid");
 		}
-		System.out.println(obj.toString());
+		
 		return obj.toString();
 	}
 }
