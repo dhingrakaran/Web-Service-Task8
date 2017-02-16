@@ -97,7 +97,8 @@ public class SellFund extends Action{
 			
 			if (noofSellableFund == position[0].getShares()) {
 				double newCash = customer.getCash() + noofSellableFund * fund.getInitial_value();
-				customerDAO.updateCash(username, newCash);
+				customer.setCash(newCash);
+				customerDAO.update(customer);
 				positionDAO.delete(position);
 				
 				obj.addProperty("message", "The fund has been successfully sold");
@@ -106,9 +107,11 @@ public class SellFund extends Action{
 
 			//what if customer sells it all? do we delete it?
 			double newCash = customer.getCash() + noofSellableFund * fund.getInitial_value();
-			customerDAO.updateCash(username, newCash);
+			customer.setCash(newCash);
+			customerDAO.update(customer);
 			double newShare = position[0].getShares() - noofSellableFund;
-			positionDAO.updateShares(line, newShare);
+			position[0].setShares(newShare);
+			positionDAO.update(position[0]);
 			
 			obj.addProperty("message", "The fund has been successfully sold");
 			
