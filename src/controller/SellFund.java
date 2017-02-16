@@ -81,21 +81,22 @@ public class SellFund extends Action{
 					MatchArg.equals("fund_id", fundDAO.readSymbol(form.getSymbol()))));
 			if (position.length == 0) {
 				// customer doesn't own this fund.
-				obj.addProperty("message", "You didn’t provide enough cash to make this purchase");
+				obj.addProperty("message", "The input you provided is not valid");
 				return obj.toString();
 			}
 			
 			int noofSellableFund = Integer.parseInt(form.getNumShares());
 			
-			if (position[0].getShares() < Double.parseDouble(form.getNumShares())) {
+			if (position[0].getShares() < noofSellableFund) {
 				obj.addProperty("message", "You don’t have that many shares in your portfolio");
+				return obj.toString();
 			}
 			
 
-			
-			double newCash = customer.getCash() + Double.parseDouble(form.getNumShares()) * fund.getInitial_value();
+			//what if customer sells it all? do we delete it?
+			double newCash = customer.getCash() + noofSellableFund * fund.getInitial_value();
 			customerDAO.updateCash(username, newCash);
-			double newShare = position[0].getShares() - Double.parseDouble(form.getNumShares());
+			double newShare = position[0].getShares() - noofSellableFund;
 			positionDAO.updateShares(line, newShare);
 			
 			obj.addProperty("message", "The fund has been successfully sold");
