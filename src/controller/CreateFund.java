@@ -2,28 +2,20 @@ package controller;
 
 import java.io.BufferedReader;
 import java.io.IOException;
-
 import javax.servlet.http.HttpServletRequest;
-
+import org.genericdao.MatchArg;
 import org.genericdao.RollbackException;
-
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
-
-import databeans.Customer;
 import databeans.Fund;
 import formbeans.CreateFundForm;
-import model.CustomerDAO;
 import model.FundDAO;
 import model.Model;
 
 public class CreateFund extends Action{
 	private FundDAO fundDAO;
-	private Customer admin;
-	private CustomerDAO customerDAO;
 	
 	public CreateFund(Model model) {
-		customerDAO = model.getCustomerDAO();
 		fundDAO = model.getFundDAO();
 	}
 	@Override
@@ -52,11 +44,19 @@ public class CreateFund extends Action{
 			if(request.getSession().getAttribute("employee") == null) {
 				obj.addProperty("message", "You must be an employee to perform this action");
 				return obj.toString();
-			} else {
+			} 
+			else {	
+	            Fund[] funds = fundDAO.match(MatchArg.equals("symbol", form.getSymbol().toUpperCase()));
+				if(funds.length == 0) {
 	            fund.setName(form.getName().toUpperCase());
 	            fund.setSymbol(form.getSymbol().toUpperCase());
+	            fund.setInitial_value(Double.parseDouble(form.getInitial_value()));
 	            fundDAO.create(fund);
-				obj.addProperty("message", "The fund was successfully created");
+				obj.addProperty("message", "The fund was successfully created");//this is not mentioned in the spec so not sure 
+				//if this message should be given as a json object
+				} else {
+					obj.addProperty("message", "The input you provided is not valid");
+				}
 			}
 		} catch (IOException e) {
 			e.printStackTrace();
