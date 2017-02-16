@@ -16,7 +16,7 @@ import formbeans.RequestCheckForm;
 import model.CustomerDAO;
 import model.Model;
 
-public class RequestCheck {
+public class RequestCheck extends Action {
 	private CustomerDAO customerDAO;
 	
 	public RequestCheck(Model model) {
@@ -27,12 +27,12 @@ public class RequestCheck {
 		return "RequestCheck";
 	}
 	
-	public String Perform(HttpServletRequest request) {
+	public String perform(HttpServletRequest request) {
 		JsonObject obj = new JsonObject();
 		BufferedReader br;
 		
 		try {
-			String username = null; //get username from authentication
+			String username = (String)request.getSession().getAttribute("customer"); //get username from authentication
 			if (username == null) {
 				obj.addProperty("message", "You are not currently logged in");
 			}

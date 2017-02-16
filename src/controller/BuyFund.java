@@ -41,59 +41,72 @@ public class BuyFund extends Action{
 		BufferedReader bReader;
 		HttpSession session = request.getSession();
 		
+		// check customer == null, customer is not logged in
+		if (session.getAttribute("customer") == null && session.getAttribute("employee") == null) {
+            obj.addProperty("message", "You are not currently logged in");
+            return obj.toString();
+        }
+		
+		// if someone is there but not customer.
+		if (session.getAttribute("customer") == null ) {
+			obj.addProperty("message", "You must be a customer to perform this action");
+            return obj.toString();
+		}
+		
 		try {
 			bReader = request.getReader();
 			String line;
 			Gson gson = new Gson();
 			line = bReader.readLine();
 			BuyFundForm form = gson.fromJson(line, BuyFundForm.class);
-			System.out.println(form.getSymbol() + " " + form.getCashValue());
-			if (session.getAttribute("customer") == null && session.getAttribute("customer") == null) {
-                obj.addProperty("message", "You are not currently logged in");
-                return obj.toString();
-            }
+
 			if (form.hasErrors()) {
 				obj.addProperty("message", "The input you provided is not valid");
-			}
-			
-			//get Customer fund cash.
-			//Assuming here we already have customer ID.
-			Customer customer = (Customer) session.getAttribute("customer");
-			String username = customer.getUsername();
-			
-			//I need to check if customer exists.
-
-			if (customer.getCash() < Integer.parseInt(form.getCashValue())) {
-				obj.addProperty("message", "You don’t have enough cash in your account to make this purchase");
 				return obj.toString();
 			}
 			
-			Fund fund = fundDAO.readSymbol(form.getSymbol());
+			String username = (String) session.getAttribute("customer"); 
+			//use CustomeDAO to get customer bean
+			Customer customer = customerDAO.read(username);
+
+			if (customer.getCash() < Double.parseDouble(form.getCashValue())) {
+				obj.addProperty("message", "You don't have enough cash in your account to make this purchase");
+				return obj.toString();
+			}
+			
+			Fund fund = fundDAO.read(form.getSymbol());
 			if (fund == null) {
 				obj.addProperty("message", "The input you provided is not valid");
 				return obj.toString();
 			}
 			
-			// we don't have transcation table now, so this is not required
-			// subtract cash value from customer cash and and funds to fund table
-//			TransactionBean tBean = new TransactionBean();
-//			tBean.setUsername(username);
-//			//have not set up function to check system time for transaction date.
-//			tBean.setFund_id(fund.getFund_id());
-//			tBean.setTransaction_type("buy");
-//			tBean.setAmount(Double.parseDouble(form.getCashValue()));
-//			transactionDAO.create(tBean);
-			
-			Position[] position = positionDAO.match(MatchArg.and(MatchArg.equals("username", customer.getUsername()), MatchArg.equals("symbol", fund.getSymbol())));
-			if (position.length == 0 || position== null) {
-				obj.addProperty("message", "The input you provided is not valid");
+			// shares will always be integer so recalculate the shares
+			int noofBuyableShares = (int) (Double.parseDouble(form.getCashValue()) / fund.getInitial_value());
+			// what if customer is not providing enough money
+			if (noofBuyableShares < 1) {
+				obj.addProperty("message", "You didn't provide enough cash to make this purchase");
 				return obj.toString();
 			}
 			
-			double newCash = customer.getCash() - Double.parseDouble(form.getCashValue());
-			customerDAO.updateCash(customer.getUsername(), newCash);
-			double newShare = position[0].getShares() + Double.parseDouble(form.getCashValue()) / fund.getInitial_value();
-			positionDAO.updateShares(username, newShare);
+			double actualFund = fund.getInitial_value() * noofBuyableShares;
+			double newCash = customer.getCash() - actualFund;
+			customer.setCash(newCash);
+			customerDAO.update(customer);
+			
+			Position[] position = positionDAO.match(MatchArg.and(MatchArg.equals("username", customer.getUsername()), MatchArg.equals("symbol", fund.getSymbol())));
+			
+			if (position.length == 0) { //this means customer has never bought such fund
+				// create new position for this customer to this this fund
+				Position newPosition = new Position();
+				newPosition.setUsername(customer.getUsername());
+				newPosition.setSymbol(form.getSymbol());
+				newPosition.setShares(noofBuyableShares);
+				positionDAO.create(newPosition);
+			
+			} else {
+				position[0].setShares(position[0].getShares() + noofBuyableShares);
+				positionDAO.update(position[0]);
+			}
 			
 			obj.addProperty("message", "The fund has been successfully purchased");
 			
@@ -104,7 +117,6 @@ public class BuyFund extends Action{
 		} catch (NullPointerException e) {
 			obj.addProperty("message", "The input you provided is not valid");
 		}
-		System.out.println(obj.toString());
 		return obj.toString();
 	}
 }

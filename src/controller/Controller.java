@@ -44,7 +44,11 @@ public class Controller extends HttpServlet {
         Action.add(new CreateCustomerAccount(model));
         Action.add(new ViewPortfolio(model));
         Action.add(new DepositCheck(model));
+        Action.add(new RequestCheck(model));
         Action.add(new CreateFund(model));
+        Action.add(new BuyFund(model));
+        Action.add(new SellFund(model));
+        Action.add(new Logout());
     }
 
 	/**

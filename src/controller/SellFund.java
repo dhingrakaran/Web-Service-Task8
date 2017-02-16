@@ -40,62 +40,58 @@ public class SellFund extends Action{
 		JsonObject obj = new JsonObject();
 		BufferedReader bReader;
 		HttpSession session = request.getSession();
+		
+		if (session.getAttribute("customer") == null && session.getAttribute("employee") == null) {
+            obj.addProperty("message", "You are not currently logged in");
+            return obj.toString();
+        }
+		//if someone is there but not customer.
+		if (session.getAttribute("customer") == null) {
+			obj.addProperty("message", "You must be a customer to perform this action");
+            return obj.toString();
+		}
+		
 		try {
 			bReader = request.getReader();
 			String line;
 			Gson gson = new Gson();
 			line = bReader.readLine();
 			SellFundForm form = gson.fromJson(line, SellFundForm.class);
-			System.out.println(form.getSymbol() + " " + form.getNumShares());
-			
-			if (session.getAttribute("customer") == null && session.getAttribute("customer") == null) {
-                obj.addProperty("message", "You are not currently logged in");
-                return obj.toString();
-            }
-			
+
 			if (form.hasErrors()) {
 				obj.addProperty("message", "The input you provided is not valid");
 			}
 			
-			//get Customer fund cash.
-			//Assuming here we already have customer ID.
+			String username = (String) session.getAttribute("customer");  
+			//use CustomeDAO to get customer bean
+			Customer customer = customerDAO.read(username);
 			
-			Customer customer = (Customer) session.getAttribute("customer");
-			String username = customer.getUsername();
-			
-			//get number of shares owned by this customer.
-			Fund fund = fundDAO.readSymbol(form.getSymbol());
-			if (fund == null) {
+			Position[] position = positionDAO.match(MatchArg.and(MatchArg.equals("username", username), MatchArg.equals("symbol", form.getSymbol())));
+			if (position.length == 0) {
+				// customer doesn't own this fund.
 				obj.addProperty("message", "The input you provided is not valid");
 				return obj.toString();
 			}
 			
-			Position[] position = positionDAO.match(MatchArg.and(MatchArg.equals("username", username), 
-					MatchArg.equals("fund_id", fundDAO.readSymbol(form.getSymbol()))));
-			if (position.length == 0 || position == null) {
-				obj.addProperty("message", "The input you provided is not valid");
+			int noofSellableFund = Integer.parseInt(form.getNumShares());
+			
+			if (position[0].getShares() < noofSellableFund) {
+				obj.addProperty("message", "You don't have that many shares in your portfolio");
 				return obj.toString();
 			}
 			
-			if (position[0].getShares() < Double.parseDouble(form.getNumShares())) {
-				obj.addProperty("message", "You don’t have that many shares in your portfolio");
+			Fund fund = fundDAO.read(form.getSymbol());
+			double newCash = customer.getCash() + noofSellableFund * fund.getInitial_value();
+			customer.setCash(newCash);
+			customerDAO.update(customer); 
+			
+			if (noofSellableFund == position[0].getShares()) {
+				positionDAO.delete(position[0]);
+			} else {
+				double newShare = position[0].getShares() - noofSellableFund;
+				position[0].setShares(newShare);
+				positionDAO.update(position[0]);
 			}
-			
-			//we don't have transaction table now
-			//subtract number of shares from position table and add money to customer account
-
-//			TransactionBean tBean = new TransactionBean();
-//			tBean.setUsername(username);
-//			//have not set up function to check system time for transaction date.
-//			tBean.setFund_id(fund.getFund_id());
-//			tBean.setTransaction_type("sell");
-//			tBean.setAmount(Double.parseDouble(form.getNumShares()));
-//			transactionDAO.create(tBean);
-			
-			double newCash = customer.getCash() + Double.parseDouble(form.getNumShares()) * fund.getInitial_value();
-			customerDAO.updateCash(username, newCash);
-			double newShare = position[0].getShares() - Double.parseDouble(form.getNumShares());
-			positionDAO.updateShares(line, newShare);
 			
 			obj.addProperty("message", "The fund has been successfully sold");
 			
@@ -103,10 +99,8 @@ public class SellFund extends Action{
 			obj.addProperty("message", "The input you provided is not valid");
 		} catch (RollbackException e) {
 			obj.addProperty("message", "The input you provided is not valid");
-		} catch (NullPointerException e) {
-			obj.addProperty("message", "The input you provided is not valid");
 		}
-		System.out.println(obj.toString());
+		
 		return obj.toString();
 	}
 }
