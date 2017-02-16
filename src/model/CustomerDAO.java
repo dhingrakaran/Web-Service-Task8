@@ -3,10 +3,8 @@
 import org.genericdao.ConnectionPool;
 import org.genericdao.DAOException;
 import org.genericdao.GenericDAO;
-<<<<<<< HEAD
-=======
-import org.genericdao.MatchArg;
->>>>>>> 98206ff6facc2c7f9f47dfede1c555e60f7ba05e
+
+
 import org.genericdao.RollbackException;
 import org.genericdao.Transaction;
 
@@ -17,7 +15,7 @@ public class CustomerDAO extends GenericDAO<Customer>{
 		super(Customer.class, tableName, connectionPool);
 	}
 	
-<<<<<<< HEAD
+
 	
 	public Customer updateCash(String username, double amount) throws RollbackException {
 	    try {
@@ -37,6 +35,5 @@ public class CustomerDAO extends GenericDAO<Customer>{
 	        if (Transaction.isActive()) Transaction.rollback();
 	    }
 	}
-=======
->>>>>>> 98206ff6facc2c7f9f47dfede1c555e60f7ba05e
+
 }
