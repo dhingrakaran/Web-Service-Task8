@@ -31,8 +31,4 @@ public class LoginForm extends FormBean {
     	
     	return false;
     }
-    
-    
-    
-    
 }

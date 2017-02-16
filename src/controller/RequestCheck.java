@@ -32,7 +32,7 @@ public class RequestCheck {
 		BufferedReader br;
 		
 		try {
-			String username = null; //get username from authentication
+			String username = (String)request.getSession().getAttribute("customer"); //get username from authentication
 			if (username == null) {
 				obj.addProperty("message", "You are not currently logged in");
 			}
