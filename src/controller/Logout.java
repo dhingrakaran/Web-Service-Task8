@@ -5,7 +5,7 @@ import javax.servlet.http.HttpServletRequest;
 import com.google.gson.JsonObject;
 
 public class Logout extends Action {
-
+	
 	public String getName() {
 		return "logout";
 	}
