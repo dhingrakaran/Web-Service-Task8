@@ -74,7 +74,7 @@ public class BuyFund extends Action{
 				return obj.toString();
 			}
 			
-			Fund fund = fundDAO.readSymbol(form.getSymbol());
+			Fund fund = fundDAO.read(form.getSymbol());
 			if (fund == null) {
 				obj.addProperty("message", "The input you provided is not valid");
 				return obj.toString();
