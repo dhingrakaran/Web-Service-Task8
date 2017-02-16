@@ -3,6 +3,7 @@ package controller;
 import java.io.BufferedReader;
 import java.io.IOException;
 
+import javax.security.auth.login.AccountException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
 
@@ -48,22 +49,29 @@ public class BuyFund extends Action{
 			line = bReader.readLine();
 			BuyFundForm form = gson.fromJson(line, BuyFundForm.class);
 			System.out.println(form.getSymbol() + " " + form.getCashValue());
-			if (session.getAttribute("customer") == null && session.getAttribute("customer") == null) {
+			//check customer == null, customer is not logged in
+			
+			if (session.getAttribute("customer") == null && session.getAttribute("employee") == null) {
                 obj.addProperty("message", "You are not currently logged in");
                 return obj.toString();
             }
+			//if someone is there but not customer.
+			if (session.getAttribute("customer") == null ) {
+				obj.addProperty("message", "You must be a customer to perform this action");
+                return obj.toString();
+			}
 			if (form.hasErrors()) {
 				obj.addProperty("message", "The input you provided is not valid");
+				return obj.toString();
 			}
 			
-			//get Customer fund cash.
-			//Assuming here we already have customer ID.
-			Customer customer = (Customer) session.getAttribute("customer");
-			String username = customer.getUsername();
 			
-			//I need to check if customer exists.
+			
+			String username = (String) session.getAttribute("customer"); 
+			//use CustomeDAO to get customer bean
+			Customer customer = customerDAO.read(username);
 
-			if (customer.getCash() < Integer.parseInt(form.getCashValue())) {
+			if (customer.getCash() < Double.parseDouble(form.getCashValue())) {
 				obj.addProperty("message", "You don’t have enough cash in your account to make this purchase");
 				return obj.toString();
 			}
@@ -74,25 +82,49 @@ public class BuyFund extends Action{
 				return obj.toString();
 			}
 			
-			// we don't have transcation table now, so this is not required
-			// subtract cash value from customer cash and and funds to fund table
-//			TransactionBean tBean = new TransactionBean();
-//			tBean.setUsername(username);
-//			//have not set up function to check system time for transaction date.
-//			tBean.setFund_id(fund.getFund_id());
-//			tBean.setTransaction_type("buy");
-//			tBean.setAmount(Double.parseDouble(form.getCashValue()));
-//			transactionDAO.create(tBean);
+
 			
+			//this is for Sell.
 			Position[] position = positionDAO.match(MatchArg.and(MatchArg.equals("username", customer.getUsername()), MatchArg.equals("symbol", fund.getSymbol())));
-			if (position.length == 0 || position== null) {
-				obj.addProperty("message", "The input you provided is not valid");
+			if (position.length == 0 ) { //this means customer has never bought such fund
+				// create new position for this customer to this this fund
+				Position newPosition = new Position();
+				newPosition.setUsername(customer.getUsername());
+				newPosition.setSymbol(form.getSymbol());
+
+				//shares will always be integer so recalculate the shares
+				int noofBuyableShares = (int) (Double.parseDouble(form.getCashValue()) / fund.getInitial_value());
+				// what if customer is not providing enough money
+				if (noofBuyableShares <= 0) {
+					obj.addProperty("message", "You didn’t provide enough cash to make this purchase");
+					return obj.toString();
+				}
+				
+				double actualFund = fund.getInitial_value() * noofBuyableShares;
+				
+				newPosition.setShares(noofBuyableShares);
+				positionDAO.create(newPosition);
+				double newCash = customer.getCash() - actualFund;
+				customerDAO.updateCash(customer.getUsername(), newCash);
+				
+				
+				
+				obj.addProperty("message", "The fund has been successfully purchased");
 				return obj.toString();
 			}
 			
-			double newCash = customer.getCash() - Double.parseDouble(form.getCashValue());
+			//shares will always be integer so recalculate the shares
+			int noofBuyableShares = (int) (Double.parseDouble(form.getCashValue()) / fund.getInitial_value());
+			// what if customer is not providing enough money
+			if (noofBuyableShares <= 0) {
+				obj.addProperty("message", "You didn’t provide enough cash to make this purchase");
+				return obj.toString();
+			}
+			
+			double actualFund = fund.getInitial_value() * noofBuyableShares;
+			double newCash = customer.getCash() - actualFund;
 			customerDAO.updateCash(customer.getUsername(), newCash);
-			double newShare = position[0].getShares() + Double.parseDouble(form.getCashValue()) / fund.getInitial_value();
+			double newShare = position[0].getShares() + noofBuyableShares;
 			positionDAO.updateShares(username, newShare);
 			
 			obj.addProperty("message", "The fund has been successfully purchased");
