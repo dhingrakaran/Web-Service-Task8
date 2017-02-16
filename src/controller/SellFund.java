@@ -40,6 +40,17 @@ public class SellFund extends Action{
 		JsonObject obj = new JsonObject();
 		BufferedReader bReader;
 		HttpSession session = request.getSession();
+		
+		if (session.getAttribute("customer") == null && session.getAttribute("employee") == null) {
+            obj.addProperty("message", "You are not currently logged in");
+            return obj.toString();
+        }
+		//if someone is there but not customer.
+		if (session.getAttribute("customer") == null ) {
+			obj.addProperty("message", "You must be a customer to perform this action");
+            return obj.toString();
+		}
+		
 		try {
 			bReader = request.getReader();
 			String line;
@@ -48,15 +59,7 @@ public class SellFund extends Action{
 			SellFundForm form = gson.fromJson(line, SellFundForm.class);
 			System.out.println(form.getSymbol() + " " + form.getNumShares());
 			
-			if (session.getAttribute("customer") == null && session.getAttribute("employee") == null) {
-                obj.addProperty("message", "You are not currently logged in");
-                return obj.toString();
-            }
-			//if someone is there but not customer.
-			if (session.getAttribute("customer") == null ) {
-				obj.addProperty("message", "You must be a customer to perform this action");
-                return obj.toString();
-			}
+
 			
 			if (form.hasErrors()) {
 				obj.addProperty("message", "The input you provided is not valid");
@@ -92,6 +95,14 @@ public class SellFund extends Action{
 				return obj.toString();
 			}
 			
+			if (noofSellableFund == position[0].getShares()) {
+				double newCash = customer.getCash() + noofSellableFund * fund.getInitial_value();
+				customerDAO.updateCash(username, newCash);
+				positionDAO.delete(position);
+				
+				obj.addProperty("message", "The fund has been successfully sold");
+				return obj.toString();
+			}
 
 			//what if customer sells it all? do we delete it?
 			double newCash = customer.getCash() + noofSellableFund * fund.getInitial_value();
