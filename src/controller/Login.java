@@ -27,29 +27,39 @@ public class Login extends Action{
 	public String perform (HttpServletRequest request) {
 		JsonObject obj = new JsonObject();
 		BufferedReader br;
+		String line;
+		
 		try {
 			br = request.getReader();
-			String line;
 			Gson gson = new Gson();
 			line = br.readLine();
 			LoginForm form = gson.fromJson(line, LoginForm.class);
-			System.out.println(form.getUsername() + " " + form.getPassword());
 			if (form.hasErrors()) {
 				obj.addProperty("message", "There seems to be an issue with the username/password combination that you entered");
 			} else if(form.getUsername().equals(admin.getUsername())) {
-				obj.addProperty("message", "Welcome " + admin.getFname());
+				if(admin.checkPassword(form.getPassword())) {
+					obj.addProperty("message", "Welcome " + admin.getFname());
+					request.getSession().setAttribute("employee", admin.getUsername());
+				} else {
+					obj.addProperty("message", "There seems to be an issue with the username/password combination that you entered");
+				}
 			} else {
 				Customer customer = customerDAO.read(form.getUsername());
-				obj.addProperty("message", "Welcome " + customer.getFname());
+				if(customer == null) {
+					obj.addProperty("message", "There seems to be an issue with the username/password combination that you entered");
+				} else if(customer.checkPassword(form.getPassword())){
+					request.getSession().setAttribute("customer", customer.getUsername());
+					obj.addProperty("message", "Welcome " + customer.getFname());
+				} else {
+					obj.addProperty("message", "There seems to be an issue with the username/password combination that you entered");
+				}
 			}
 		} catch (IOException e) {
-			obj.addProperty("message", "There seems to be an issue with the username/password combination that you entered");
+			e.printStackTrace();
 		} catch (RollbackException e) {
-			obj.addProperty("message", "There seems to be an issue with the username/password combination that you entered");
-		} catch (NullPointerException e) {
-			obj.addProperty("message", "There seems to be an issue with the username/password combination that you entered");
+			e.printStackTrace();
 		}
-		System.out.println(obj.toString());
+		
 		return obj.toString();
 	}
 }

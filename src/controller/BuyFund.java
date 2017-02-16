@@ -1,7 +1,5 @@
 package controller;
 
-
-
 import java.io.BufferedReader;
 import java.io.IOException;
 
@@ -14,21 +12,17 @@ import com.google.gson.JsonObject;
 
 import databeans.Customer;
 import databeans.Fund;
-import databeans.TransactionBean;
 import formbeans.BuyFundForm;
 import model.CustomerDAO;
 import model.FundDAO;
 import model.Model;
-import model.TransactionDAO;
 
 public class BuyFund extends Action{
 	private CustomerDAO customerDAO;
-	private TransactionDAO transactionDAO;
 	private FundDAO fundDAO;
 	
 	public BuyFund(Model model) {
 		customerDAO = model.getCustomerDAO();
-		transactionDAO = model.getTransactionDAO();
 		fundDAO = model.getFundDAO();
 	}
 	
@@ -65,13 +59,15 @@ public class BuyFund extends Action{
 				return obj.toString();
 			}
 			
-			TransactionBean tBean = new TransactionBean();
-			tBean.setUsername(username);
-			//have not set up function to check system time for transaction date.
-			tBean.setFund_id(fund.getFund_id());
-			tBean.setTransaction_type("buy");
-			tBean.setAmount(Double.parseDouble(form.getCashValue()));
-			transactionDAO.create(tBean);
+			// we don't have transcation table now, so this is not required
+			// subtract cash value from customer cash and and funds to fund table
+//			TransactionBean tBean = new TransactionBean();
+//			tBean.setUsername(username);
+//			//have not set up function to check system time for transaction date.
+//			tBean.setFund_id(fund.getFund_id());
+//			tBean.setTransaction_type("buy");
+//			tBean.setAmount(Double.parseDouble(form.getCashValue()));
+//			transactionDAO.create(tBean);
 			
 			obj.addProperty("message", "The fund has been successfully purchased");
 			

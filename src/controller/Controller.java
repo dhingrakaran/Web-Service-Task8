@@ -40,6 +40,7 @@ public class Controller extends HttpServlet {
         admin.setZip("15143");
         
         Action.add(new Login(model, admin)); // do not send admin as parameter in other action classes
+        Action.add(new TransitionDay(model));
     }
 
 	/**

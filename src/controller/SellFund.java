@@ -4,8 +4,6 @@ import java.io.BufferedReader;
 import java.io.IOException;
 
 import javax.servlet.http.HttpServletRequest;
-
-import org.eclipse.jdt.internal.compiler.ast.AND_AND_Expression;
 import org.genericdao.MatchArg;
 import org.genericdao.RollbackException;
 
@@ -15,23 +13,19 @@ import com.google.gson.JsonObject;
 import databeans.Customer;
 import databeans.Fund;
 import databeans.Position;
-import databeans.TransactionBean;
 import formbeans.SellFundForm;
 import model.CustomerDAO;
 import model.FundDAO;
 import model.Model;
 import model.PositionDAO;
-import model.TransactionDAO;
 
 public class SellFund extends Action{
 	private CustomerDAO customerDAO;
-	private TransactionDAO transactionDAO;
 	private FundDAO fundDAO;
 	private PositionDAO positionDAO;
 	
 	public SellFund(Model model) {
 		customerDAO = model.getCustomerDAO();
-		transactionDAO = model.getTransactionDAO();
 		fundDAO = model.getFundDAO();
 		positionDAO = model.getPositionDAO();
 	}
@@ -78,16 +72,17 @@ public class SellFund extends Action{
 				obj.addProperty("message", "You don’t have enough cash in your account to make this purchase");
 			}
 			
-			
-			
-			TransactionBean tBean = new TransactionBean();
-			tBean.setUsername(username);
-			//have not set up function to check system time for transaction date.
-			tBean.setFund_id(fund.getFund_id());
-			tBean.setTransaction_type("sell");
-			tBean.setAmount(Double.parseDouble(form.getNumShares()));
-			transactionDAO.create(tBean);
-			
+			//we don't have transaction table now
+			//subtract number of shares from position table and add money to customer account
+
+//			TransactionBean tBean = new TransactionBean();
+//			tBean.setUsername(username);
+//			//have not set up function to check system time for transaction date.
+//			tBean.setFund_id(fund.getFund_id());
+//			tBean.setTransaction_type("sell");
+//			tBean.setAmount(Double.parseDouble(form.getNumShares()));
+//			transactionDAO.create(tBean);
+//			
 			obj.addProperty("message", "The fund has been successfully sold");
 			
 		} catch (IOException e) {
