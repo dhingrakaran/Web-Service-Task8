@@ -88,7 +88,7 @@ public class SellFund extends Action{
 			if (noofSellableFund == position[0].getShares()) {
 				positionDAO.delete(position[0]);
 			} else {
-				double newShare = position[0].getShares() - noofSellableFund;
+				int newShare = position[0].getShares() - noofSellableFund;
 				position[0].setShares(newShare);
 				positionDAO.update(position[0]);
 			}

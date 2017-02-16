@@ -40,33 +40,38 @@ public class ViewPortfolio extends Action{
         JsonObject mainObj = new JsonObject();
         JsonArray jArray = new JsonArray();
         HttpSession session = request.getSession();
+        
         if (session.getAttribute("employee") == null && session.getAttribute("customer") == null) {
             mainObj.addProperty("message", "You are not currently logged in");
             return mainObj.toString();
         }
         
+        if (session.getAttribute("customer") == null) {
+            mainObj.addProperty("message", "You must be a customer to perform this action");
+            return mainObj.toString();
+        }
+        
         try {
-            if (session.getAttribute("employee") != null && session.getAttribute("customer") == null) {
-                mainObj.addProperty("message", "You must be a customer to perform this action");
-                return mainObj.toString();
-            }
-            Position[] positions = positionDAO.match(MatchArg.equals("username", session.getAttribute("customer")));
+            Position[] positions = positionDAO.match(MatchArg.equals("username", (String) session.getAttribute("customer")));
             if (positions.length == 0) {
                 mainObj.addProperty("message", "You don't have any funds in your Portfolio");
                 return mainObj.toString();
             }
+            
+            DecimalFormat formatter = new DecimalFormat("#0.00");
+            
             for (Position p: positions) {
                 JsonObject obj = new JsonObject();
                 Fund fund = fundDAO.read(p.getSymbol());
                 String fundName = fund.getName();
                 double fundPrice = fund.getInitial_value();
                 obj.addProperty("name", fundName);
-                obj.addProperty("shares", p.getShares());
-                obj.addProperty("price", fundPrice);
+                obj.addProperty("shares", String.valueOf(p.getShares()));
+                obj.addProperty("price", formatter.format(fundPrice));
                 jArray.add(obj);
             }
+            
             double cash = customerDAO.read(session.getAttribute("customer")).getCash();
-            DecimalFormat formatter = new DecimalFormat("#0.00");
             mainObj.addProperty("message", "The action was successful");
             mainObj.addProperty("cash", formatter.format(cash));
             mainObj.add("funds", jArray);

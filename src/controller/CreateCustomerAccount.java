@@ -3,8 +3,6 @@ package controller;
 
 import java.io.BufferedReader;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
@@ -36,12 +34,18 @@ public class CreateCustomerAccount extends Action {
     public String perform(HttpServletRequest request) {
         JsonObject obj = new JsonObject();
         HttpSession session = request.getSession();
+        BufferedReader br;
+        CreateCustomerAccountForm form = null;
+        
         if (session.getAttribute("employee") == null && session.getAttribute("customer") == null) {
             obj.addProperty("message", "You are not currently logged in");
             return obj.toString();
         }
-        BufferedReader br;
-        CreateCustomerAccountForm form = null;
+        
+        if (session.getAttribute("employee") == null) {
+            obj.addProperty("message", "You must be an employee to perform this action");
+            return obj.toString();
+        }
         
         try {
             br = request.getReader();
@@ -50,10 +54,6 @@ public class CreateCustomerAccount extends Action {
             Gson gson = new Gson();
             form = gson.fromJson(line, CreateCustomerAccountForm.class);
             
-            if (session.getAttribute("employee") == null && session.getAttribute("customer") != null) {
-                obj.addProperty("message", "You must be an employee to perform this action");
-                return obj.toString();
-            }
             if (form.hasErrors()) {
                 obj.addProperty("message", "The input you provided is not valid");
                 return obj.toString();
@@ -73,7 +73,6 @@ public class CreateCustomerAccount extends Action {
             customerDAO.create(customer);
             String fname = customer.getFname();
             obj.addProperty("message", fname + " was registered successfully");
-            
             
         } catch(DuplicateKeyException e) {
             obj.addProperty("message", "The input you provided is not valid");

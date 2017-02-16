@@ -49,7 +49,8 @@ public class TransitionDay extends Action {
 				double newValue = funds[i].getInitial_value() * change;
 				double roundOff = Math.round(newValue * 100) / 100.0;
 				if(roundOff == 0) {
-					++roundOff;
+					newValue = funds[i].getInitial_value() * 1.1;
+					roundOff = Math.round(newValue * 100) / 100.0;
 				}
 				funds[i].setInitial_value(roundOff);
 				fundDAO.update(funds[i]);

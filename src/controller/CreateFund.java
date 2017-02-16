@@ -6,6 +6,7 @@ import java.io.IOException;
 import javax.servlet.http.HttpServletRequest;
 
 import org.genericdao.DuplicateKeyException;
+import org.genericdao.MatchArg;
 import org.genericdao.RollbackException;
 
 import com.google.gson.Gson;
@@ -48,6 +49,8 @@ public class CreateFund extends Action{
 			line = br.readLine();
 			CreateFundForm form = gson.fromJson(line, CreateFundForm.class);
 			if (form.hasErrors()) {
+				obj.addProperty("message", "The input you provided is not valid");
+			} else if(fundDAO.match(MatchArg.equals("name", form.getName())) != null) {
 				obj.addProperty("message", "The input you provided is not valid");
 			} else {
 				Fund fund = new Fund();
