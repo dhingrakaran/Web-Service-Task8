@@ -41,6 +41,8 @@ public class Controller extends HttpServlet {
         
         Action.add(new Login(model, admin)); // do not send admin as parameter in other action classes
         Action.add(new TransitionDay(model));
+        Action.add(new CreateCustomerAccount(model));
+        Action.add(new ViewPortfolio(model));
     }
 
 	/**

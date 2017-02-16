@@ -11,23 +11,19 @@ import javax.servlet.http.HttpSession;
 
 import org.genericdao.DuplicateKeyException;
 import org.genericdao.RollbackException;
-import org.mybeans.form.FormBeanException;
-import org.mybeans.form.FormBeanFactory;
 
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
 
-import controller.Action;
 import databeans.Customer;
 import formbeans.CreateCustomerAccountForm;
-import formbeans.LoginForm;
 import model.CustomerDAO;
 import model.Model;
 
-public class CreateCustomerAccountAction extends Action {
+public class CreateCustomerAccount extends Action {
     private CustomerDAO customerDAO;
     
-    public CreateCustomerAccountAction(Model model) {
+    public CreateCustomerAccount(Model model) {
         customerDAO = model.getCustomerDAO();
     }
     
@@ -40,8 +36,6 @@ public class CreateCustomerAccountAction extends Action {
     public String perform(HttpServletRequest request) {
         JsonObject obj = new JsonObject();
         BufferedReader br;
-        List<String> errors = new ArrayList<String>();
-        request.setAttribute("errors",errors);
         CreateCustomerAccountForm form = null;
         HttpSession session = request.getSession();
         try {
