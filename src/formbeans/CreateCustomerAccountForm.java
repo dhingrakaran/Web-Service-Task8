@@ -89,6 +89,16 @@ public class CreateCustomerAccountForm extends FormBean{
 	public String getCash() {
 		return cash;
 	}
+	
+	public double getCashAsDouble() {
+	    try {
+	        Double cashAsDouble = Double.parseDouble(cash);
+	        return Math.round(cashAsDouble * 100.0) / 100.0;
+	    } catch (NumberFormatException e) {
+	        return -1;
+	    }
+
+	}
 
 	public void setCash(String cash) {
 		this.cash = trimAndConvert(cash, "<>\"");
@@ -134,6 +144,10 @@ public class CreateCustomerAccountForm extends FormBean{
         
         if (cash == null || cash.length() == 0) {
         	cash = "0.00";
+        }
+        
+        if (!cash.matches("^([1-9][0-9]*)+(.[0-9]{0,2})?$")) {
+          return true;          
         }
         
         try {
