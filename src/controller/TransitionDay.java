@@ -48,9 +48,8 @@ public class TransitionDay extends Action {
 				change /= 100;
 				double newValue = funds[i].getInitial_value() * change;
 				double roundOff = Math.round(newValue * 100) / 100.0;
-				if(roundOff <= 0) {
-					change = 100.0 - randomValue;
-					newValue = funds[i].getInitial_value() * change;
+				if(roundOff == 0) {
+					newValue = funds[i].getInitial_value() * 1.1;
 					roundOff = Math.round(newValue * 100) / 100.0;
 				}
 				funds[i].setInitial_value(roundOff);

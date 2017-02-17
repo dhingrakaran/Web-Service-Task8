@@ -6,7 +6,7 @@ import org.genericdao.PrimaryKey;
 public class Position {
     private String username;
     private String symbol;
-    private double shares;
+    private int shares;
     
     public String getUsername() {
         return username;
@@ -24,11 +24,11 @@ public class Position {
         this.symbol = symbol;
     }
     
-    public double getShares() {
+    public int getShares() {
         return shares;
     }
     
-    public void setShares(double shares) {
+    public void setShares(int shares) {
         this.shares = shares;
     }
 }
