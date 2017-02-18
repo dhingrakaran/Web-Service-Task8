@@ -82,9 +82,13 @@ public class BuyFund extends Action{
 			
 			// shares will always be integer so recalculate the shares
 			int noofBuyableShares = (int) (Double.parseDouble(form.getCashValue()) / fund.getInitial_value());
+			System.out.println("Number of Buyable Shares: " + noofBuyableShares);
 			// what if customer is not providing enough money
+			System.out.println(noofBuyableShares < 1);
 			if (noofBuyableShares < 1) {
+			
 				obj.addProperty("message", "You didn't provide enough cash to make this purchase");
+				System.out.println(obj.toString());
 				return obj.toString();
 			}
 			
@@ -117,6 +121,7 @@ public class BuyFund extends Action{
 		} catch (NullPointerException e) {
 			obj.addProperty("message", "The input you provided is not valid");
 		}
+		System.out.println(obj.toString());
 		return obj.toString();
 	}
 }
