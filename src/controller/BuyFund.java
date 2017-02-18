@@ -44,13 +44,15 @@ public class BuyFund extends Action{
 		// check customer == null, customer is not logged in
 		if (session.getAttribute("customer") == null && session.getAttribute("employee") == null) {
             obj.addProperty("message", "You are not currently logged in");
+            System.out.println(obj.toString());
             return obj.toString();
         }
 		
 		// if someone is there but not customer.
 		if (session.getAttribute("customer") == null ) {
 			obj.addProperty("message", "You must be a customer to perform this action");
-            return obj.toString();
+			System.out.println(obj.toString());
+			return obj.toString();
 		}
 		
 		try {
@@ -62,6 +64,8 @@ public class BuyFund extends Action{
 
 			if (form.hasErrors()) {
 				obj.addProperty("message", "The input you provided is not valid");
+				System.out.println("form error:" + obj.toString());
+				System.out.println(form.getValidationErrors());
 				return obj.toString();
 			}
 			
@@ -71,20 +75,26 @@ public class BuyFund extends Action{
 
 			if (customer.getCash() < Double.parseDouble(form.getCashValue())) {
 				obj.addProperty("message", "You don't have enough cash in your account to make this purchase");
+				System.out.println(obj.toString());
 				return obj.toString();
 			}
 			
 			Fund fund = fundDAO.read(form.getSymbol());
 			if (fund == null) {
 				obj.addProperty("message", "The input you provided is not valid");
+				System.out.println("fund doesn't exist: " + obj.toString());
 				return obj.toString();
 			}
 			
 			// shares will always be integer so recalculate the shares
 			int noofBuyableShares = (int) (Double.parseDouble(form.getCashValue()) / fund.getInitial_value());
+			System.out.println("Number of Buyable Shares: " + noofBuyableShares);
 			// what if customer is not providing enough money
+			System.out.println(noofBuyableShares < 1);
 			if (noofBuyableShares < 1) {
+			
 				obj.addProperty("message", "You didn't provide enough cash to make this purchase");
+				System.out.println(obj.toString());
 				return obj.toString();
 			}
 			
@@ -117,6 +127,7 @@ public class BuyFund extends Action{
 		} catch (NullPointerException e) {
 			obj.addProperty("message", "The input you provided is not valid");
 		}
+		System.out.println(obj.toString());
 		return obj.toString();
 	}
 }

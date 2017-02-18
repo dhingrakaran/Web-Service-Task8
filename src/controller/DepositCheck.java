@@ -50,9 +50,14 @@ public class DepositCheck extends Action{
 				obj.addProperty("message", "The input you provided is not valid");
 			} else {
 				Customer customer = customerDAO.read(form.getUsername());
-				customer.setCash(customer.getCash() + Double.parseDouble(form.getCash()));
-				customerDAO.update(customer);
-				obj.addProperty("message", "The check was successfully deposited");
+				if(customer != null) {
+					customer.setCash(customer.getCash() + Double.parseDouble(form.getCash()));
+					customerDAO.update(customer);
+					obj.addProperty("message", "The check was successfully deposited");	
+				}
+				else {
+				obj.addProperty("message", "The input you provided is not valid");
+				}
 			}
 		} catch (IOException e) {
 			e.printStackTrace();

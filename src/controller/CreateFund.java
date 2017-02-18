@@ -2,16 +2,12 @@ package controller;
 
 import java.io.BufferedReader;
 import java.io.IOException;
-
 import javax.servlet.http.HttpServletRequest;
-
 import org.genericdao.DuplicateKeyException;
 import org.genericdao.MatchArg;
 import org.genericdao.RollbackException;
-
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
-
 import databeans.Fund;
 import formbeans.CreateFundForm;
 import model.FundDAO;
@@ -33,7 +29,7 @@ public class CreateFund extends Action{
 		BufferedReader br;
 		String line;
 		
-		if(request.getSession().getAttribute("employee")== null && request.getSession().getAttribute("customer") == null){
+		if(request.getSession().getAttribute("employee") == null && request.getSession().getAttribute("customer") == null) {
 			obj.addProperty("message", "You are not currently logged in");
 			return obj.toString();
 		}
@@ -54,11 +50,12 @@ public class CreateFund extends Action{
 				obj.addProperty("message", "The input you provided is not valid");
 			} else {
 				Fund fund = new Fund();
-	            fund.setName(form.getName().toUpperCase());
-	            fund.setSymbol(form.getSymbol().toUpperCase());
+	            fund.setName(form.getName());
+	            fund.setSymbol(form.getSymbol());
 	            fund.setInitial_value(Double.parseDouble(form.getInitial_value()));
 	            fundDAO.create(fund);
-				obj.addProperty("message", "The fund was successfully created");
+				obj.addProperty("message", "The fund was successfully created");//this is not mentioned in the spec so not sure 
+				//if this message should be given as a json object
 			}
 		} catch (IOException e) {
 			e.printStackTrace();

@@ -43,7 +43,7 @@ public class TransitionDay extends Action {
 			
 			Fund funds[] = fundDAO.match();
 			for(int i = 0; i < funds.length; ++i) {
-				int randomValue = random.nextInt(21) - 10;
+				int randomValue = random.nextInt(21) - 10;				
 				double change = 100.0 + randomValue; 
 				change /= 100;
 				double newValue = funds[i].getInitial_value() * change;
