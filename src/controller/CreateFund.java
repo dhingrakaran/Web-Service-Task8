@@ -50,7 +50,7 @@ public class CreateFund extends Action{
 			CreateFundForm form = gson.fromJson(line, CreateFundForm.class);
 			if (form.hasErrors()) {
 				obj.addProperty("message", "The input you provided is not valid");
-			} else if(fundDAO.match(MatchArg.equals("name", form.getName())) != null) {
+			} else if(fundDAO.match(MatchArg.equals("name", form.getName())).length != 0) {
 				obj.addProperty("message", "The input you provided is not valid");
 			} else {
 				Fund fund = new Fund();
