@@ -34,7 +34,7 @@ public class SellFundForm extends FormBean{
 		}
 		
 		try {
-            Double.parseDouble(numShares);
+            Integer.parseInt(numShares);
         } catch (NumberFormatException e) {
             return true;
         }

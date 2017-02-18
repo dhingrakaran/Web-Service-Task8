@@ -146,15 +146,15 @@ public class CreateCustomerAccountForm extends FormBean{
         	cash = "0.00";
         }
         
-//        if (!cash.matches("^([1-9][0-9]*)+(.[0-9]{0,2})?$")) {
-//          return true;          
-//        }
-        
         try {
         	Double.parseDouble(cash);
         } catch (NumberFormatException e) {
         	return true;
         }
+        
+        if(Double.parseDouble(cash) != Math.round(Double.parseDouble(cash) * 100) / 100) {
+			return true;
+		}
         
         return false;
     }
