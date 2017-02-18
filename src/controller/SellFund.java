@@ -106,9 +106,9 @@ public class SellFund extends Action{
 			obj.addProperty("message", "The fund has been successfully sold");
 			
 		} catch (IOException e) {
-			obj.addProperty("message", "IOE: The input you provided is not valid");
+			obj.addProperty("message", "The input you provided is not valid");
 		} catch (RollbackException e) {
-			obj.addProperty("message", "RollBack: The input you provided is not valid");
+			obj.addProperty("message", "The input you provided is not valid");
 		}
 		System.out.println(obj.toString());
 		return obj.toString();
