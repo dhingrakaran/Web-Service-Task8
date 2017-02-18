@@ -51,6 +51,10 @@ public class CreateFundForm extends FormBean{
         	return true;
         }
         
+        if(Double.parseDouble(initial_value) <= 0) {
+        	return true;
+        }
+        
         return false;
     }
 }
