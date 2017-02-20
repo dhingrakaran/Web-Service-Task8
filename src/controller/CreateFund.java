@@ -3,6 +3,8 @@ package controller;
 import java.io.BufferedReader;
 import java.io.IOException;
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpSession;
+
 import org.genericdao.DuplicateKeyException;
 import org.genericdao.MatchArg;
 import org.genericdao.RollbackException;
@@ -28,13 +30,23 @@ public class CreateFund extends Action{
 		JsonObject obj = new JsonObject();
 		BufferedReader br;
 		String line;
+		HttpSession session = request.getSession();
 		
-		if(request.getSession().getAttribute("employee") == null && request.getSession().getAttribute("customer") == null) {
+		if(session.getAttribute("employee") == null && session.getAttribute("customer") == null) {
 			obj.addProperty("message", "You are not currently logged in");
 			return obj.toString();
 		}
 		
-		if(request.getSession().getAttribute("employee") == null) {
+		long time = (long) session.getAttribute("time");
+		if(System.currentTimeMillis() > time + 900000) {
+			session.setAttribute("customer", null);
+			session.setAttribute("employee", null);
+			obj.addProperty("message", "You are not currently logged in");
+            return obj.toString();
+		}
+		session.setAttribute("time", System.currentTimeMillis());
+		
+		if(session.getAttribute("employee") == null) {
 			obj.addProperty("message", "You must be an employee to perform this action");
 			return obj.toString();
 		}

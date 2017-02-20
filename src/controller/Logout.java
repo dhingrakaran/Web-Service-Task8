@@ -13,7 +13,7 @@ public class Logout extends Action {
 	public String perform(HttpServletRequest request) {
 		JsonObject obj = new JsonObject();
 		
-		if(request.getSession().getAttribute("employee")== null && request.getSession().getAttribute("customer") == null){
+		if(request.getSession().getAttribute("employee") == null && request.getSession().getAttribute("customer") == null){
 			obj.addProperty("message", "You are not currently logged in");
 		} else {
 			request.getSession().setAttribute("employee", null);

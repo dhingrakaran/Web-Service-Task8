@@ -4,6 +4,7 @@ import java.io.BufferedReader;
 import java.io.IOException;
 
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpSession;
 
 import org.genericdao.RollbackException;
 
@@ -30,13 +31,23 @@ public class DepositCheck extends Action{
 		JsonObject obj = new JsonObject();
 		BufferedReader br;
 		String line;
+		HttpSession session = request.getSession();
 		
-		if(request.getSession().getAttribute("employee")== null && request.getSession().getAttribute("customer") == null){
+		if(session.getAttribute("employee") == null && session.getAttribute("customer") == null) {
 			obj.addProperty("message", "You are not currently logged in");
 			return obj.toString();
 		}
 		
-		if(request.getSession().getAttribute("employee") == null) {
+		long time = (long) session.getAttribute("time");
+		if(System.currentTimeMillis() > time + 900000) {
+			session.setAttribute("customer", null);
+			session.setAttribute("employee", null);
+			obj.addProperty("message", "You are not currently logged in");
+            return obj.toString();
+		}
+		session.setAttribute("time", System.currentTimeMillis());
+		
+		if(session.getAttribute("employee") == null) {
 			obj.addProperty("message", "You must be an employee to perform this action");
 			return obj.toString();
 		}
@@ -56,7 +67,7 @@ public class DepositCheck extends Action{
 					obj.addProperty("message", "The check was successfully deposited");	
 				}
 				else {
-				obj.addProperty("message", "The input you provided is not valid");
+					obj.addProperty("message", "The input you provided is not valid");
 				}
 			}
 		} catch (IOException e) {

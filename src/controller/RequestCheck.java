@@ -4,6 +4,7 @@ import java.io.BufferedReader;
 import java.io.IOException;
 
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpSession;
 
 import org.genericdao.MatchArg;
 import org.genericdao.RollbackException;
@@ -30,18 +31,31 @@ public class RequestCheck extends Action {
 	public String perform(HttpServletRequest request) {
 		JsonObject obj = new JsonObject();
 		BufferedReader br;
+		HttpSession session = request.getSession();
 		
 		try {
-			String admin = (String)request.getSession().getAttribute("employee");
-			String c_username = (String)request.getSession().getAttribute("customer"); //get username from authentication
+			String admin = (String) session.getAttribute("employee");
+			String c_username = (String) session.getAttribute("customer"); //get username from authentication
+			
 			if (admin == null && c_username == null) {
 				obj.addProperty("message", "You are not currently logged in");
 				return obj.toString();
-			} 
-			if (c_username == null && admin != null) {
+			}
+			
+			long time = (long) session.getAttribute("time");
+			if(System.currentTimeMillis() > time + 900000) {
+				session.setAttribute("customer", null);
+				session.setAttribute("employee", null);
+				obj.addProperty("message", "You are not currently logged in");
+	            return obj.toString();
+			}
+			session.setAttribute("time", System.currentTimeMillis());
+			
+			if (c_username == null) {
 				obj.addProperty("message", "You must be a customer to perform this action");
 				return obj.toString();
 			}
+			
 			Customer[] customers = customerDAO.match(MatchArg.equals("username", c_username));
 			//if (customers.length == 0) obj.addProperty("message", "You must be a customer to perform this action");
 			Customer customer = customers[0];

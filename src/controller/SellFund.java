@@ -46,6 +46,16 @@ public class SellFund extends Action{
             System.out.println("not own fund: " + obj.toString());
             return obj.toString();
         }
+		
+		long time = (long) session.getAttribute("time");
+		if(System.currentTimeMillis() > time + 900000) {
+			session.setAttribute("customer", null);
+			session.setAttribute("employee", null);
+			obj.addProperty("message", "You are not currently logged in");
+            return obj.toString();
+		}
+		session.setAttribute("time", System.currentTimeMillis());
+		
 		//if someone is there but not customer.
 		if (session.getAttribute("customer") == null) {
 			obj.addProperty("message", "You must be a customer to perform this action");

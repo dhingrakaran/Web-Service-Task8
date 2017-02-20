@@ -40,6 +40,7 @@ public class Login extends Action{
 				if(admin.checkPassword(form.getPassword())) {
 					obj.addProperty("message", "Welcome " + admin.getFname());
 					request.getSession().setAttribute("employee", admin.getUsername());
+					request.getSession().setAttribute("time", System.currentTimeMillis());
 				} else {
 					obj.addProperty("message", "There seems to be an issue with the username/password combination that you entered");
 				}
@@ -50,6 +51,7 @@ public class Login extends Action{
 				} else if(customer.checkPassword(form.getPassword())){
 					request.getSession().setAttribute("customer", customer.getUsername());
 					obj.addProperty("message", "Welcome " + customer.getFname());
+					request.getSession().setAttribute("time", System.currentTimeMillis());
 				} else {
 					obj.addProperty("message", "There seems to be an issue with the username/password combination that you entered");
 				}
