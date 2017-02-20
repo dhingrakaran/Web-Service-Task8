@@ -46,15 +46,6 @@ public class ViewPortfolio extends Action{
             return mainObj.toString();
         }
         
-        long time = (long) session.getAttribute("time");
-		if(System.currentTimeMillis() > time + 900000) {
-			session.setAttribute("customer", null);
-			session.setAttribute("employee", null);
-			mainObj.addProperty("message", "You are not currently logged in");
-            return mainObj.toString();
-		}
-		session.setAttribute("time", System.currentTimeMillis());
-        
         if (session.getAttribute("customer") == null) {
             mainObj.addProperty("message", "You must be a customer to perform this action");
             return mainObj.toString();
@@ -62,6 +53,7 @@ public class ViewPortfolio extends Action{
         
         try {
             Position[] positions = positionDAO.match(MatchArg.equals("username", (String) session.getAttribute("customer")));
+            double cash = customerDAO.read((String) session.getAttribute("customer")).getCash();
             if (positions.length == 0) {
                 mainObj.addProperty("message", "You don't have any funds in your Portfolio");
                 return mainObj.toString();
@@ -80,7 +72,6 @@ public class ViewPortfolio extends Action{
                 jArray.add(obj);
             }
             
-            double cash = customerDAO.read((String) session.getAttribute("customer")).getCash();
             mainObj.addProperty("message", "The action was successful");
             mainObj.addProperty("cash", formatter.format(cash));
             mainObj.add("funds", jArray);

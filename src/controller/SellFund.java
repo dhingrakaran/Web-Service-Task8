@@ -8,6 +8,7 @@ import javax.servlet.http.HttpSession;
 
 import org.genericdao.MatchArg;
 import org.genericdao.RollbackException;
+import org.genericdao.Transaction;
 
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
@@ -47,15 +48,6 @@ public class SellFund extends Action{
             return obj.toString();
         }
 		
-		long time = (long) session.getAttribute("time");
-		if(System.currentTimeMillis() > time + 900000) {
-			session.setAttribute("customer", null);
-			session.setAttribute("employee", null);
-			obj.addProperty("message", "You are not currently logged in");
-            return obj.toString();
-		}
-		session.setAttribute("time", System.currentTimeMillis());
-		
 		//if someone is there but not customer.
 		if (session.getAttribute("customer") == null) {
 			obj.addProperty("message", "You must be a customer to perform this action");
@@ -77,6 +69,8 @@ public class SellFund extends Action{
 				
 			}
 			
+			Transaction.begin();
+			
 			String username = (String) session.getAttribute("customer");  
 			//use CustomeDAO to get customer bean
 			Customer customer = customerDAO.read(username);
@@ -87,6 +81,7 @@ public class SellFund extends Action{
 				
 				obj.addProperty("message", "The input you provided is not valid");
 				System.out.println("not own fund: " + obj.toString());
+				Transaction.commit();
 				return obj.toString();
 			}
 			
@@ -96,6 +91,7 @@ public class SellFund extends Action{
 				System.out.println("do not have enough shares");
 				obj.addProperty("message", "You don't have that many shares in your portfolio");
 				System.out.println(obj.toString());
+				Transaction.commit();
 				return obj.toString();
 			}
 			
@@ -115,11 +111,15 @@ public class SellFund extends Action{
 			
 			obj.addProperty("message", "The fund has been successfully sold");
 			
+			Transaction.commit();
+			
 		} catch (IOException e) {
 			obj.addProperty("message", "The input you provided is not valid");
 		} catch (RollbackException e) {
 			obj.addProperty("message", "The input you provided is not valid");
-		}
+		} finally {
+            if (Transaction.isActive()) Transaction.rollback(); 
+        }
 		System.out.println(obj.toString());
 		return obj.toString();
 	}

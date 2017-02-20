@@ -6,7 +6,7 @@ import org.genericdao.PrimaryKey;
 public class Fund {
 	private String symbol = null;
 	private String name = null;
-	private double initial_value; 
+	private double initial_value;
 	
 	public String getName() {
 		return name;

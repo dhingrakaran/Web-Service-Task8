@@ -8,6 +8,7 @@ import javax.servlet.http.HttpSession;
 
 import org.genericdao.MatchArg;
 import org.genericdao.RollbackException;
+import org.genericdao.Transaction;
 
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
@@ -42,19 +43,12 @@ public class RequestCheck extends Action {
 				return obj.toString();
 			}
 			
-			long time = (long) session.getAttribute("time");
-			if(System.currentTimeMillis() > time + 900000) {
-				session.setAttribute("customer", null);
-				session.setAttribute("employee", null);
-				obj.addProperty("message", "You are not currently logged in");
-	            return obj.toString();
-			}
-			session.setAttribute("time", System.currentTimeMillis());
-			
 			if (c_username == null) {
 				obj.addProperty("message", "You must be a customer to perform this action");
 				return obj.toString();
 			}
+			
+			Transaction.begin();
 			
 			Customer[] customers = customerDAO.match(MatchArg.equals("username", c_username));
 			//if (customers.length == 0) obj.addProperty("message", "You must be a customer to perform this action");
@@ -68,23 +62,24 @@ public class RequestCheck extends Action {
 			//just compare the form value with customer cash value and if the customer has enough cash then subtract
 			if (form.hasErrors()) {
 				obj.addProperty("message", "The input you provided is not valid");
-				return obj.toString();
 			} else if (form.getAmountAsDouble() > balance) {
 				obj.addProperty("message", "You don't have sufficient funds in your account to cover the requested check");
-				return obj.toString();
 			} else {
 				customer.setCash(balance - form.getAmountAsDouble());
 				customerDAO.update(customer);
                 obj.addProperty("message", "The check has been successfully requested");
-                return obj.toString();
 			}
+			
+			Transaction.commit();
 		} catch (IOException e) {
 			obj.addProperty("message", "The input you provided is not valid");
 		} catch (RollbackException e) {
 			obj.addProperty("message", "The input you provided is not valid");
 		} catch (NullPointerException e) {
 			obj.addProperty("message", "The input you provided is not valid");
-		}
+		} finally {
+            if (Transaction.isActive()) Transaction.rollback(); 
+        }
 		return obj.toString();
 	}
 }

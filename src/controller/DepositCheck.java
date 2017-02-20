@@ -7,6 +7,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
 
 import org.genericdao.RollbackException;
+import org.genericdao.Transaction;
 
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
@@ -38,15 +39,6 @@ public class DepositCheck extends Action{
 			return obj.toString();
 		}
 		
-		long time = (long) session.getAttribute("time");
-		if(System.currentTimeMillis() > time + 900000) {
-			session.setAttribute("customer", null);
-			session.setAttribute("employee", null);
-			obj.addProperty("message", "You are not currently logged in");
-            return obj.toString();
-		}
-		session.setAttribute("time", System.currentTimeMillis());
-		
 		if(session.getAttribute("employee") == null) {
 			obj.addProperty("message", "You must be an employee to perform this action");
 			return obj.toString();
@@ -60,6 +52,7 @@ public class DepositCheck extends Action{
 			if (form.hasErrors()) {
 				obj.addProperty("message", "The input you provided is not valid");
 			} else {
+				Transaction.begin();
 				Customer customer = customerDAO.read(form.getUsername());
 				if(customer != null) {
 					customer.setCash(customer.getCash() + Double.parseDouble(form.getCash()));
@@ -69,12 +62,15 @@ public class DepositCheck extends Action{
 				else {
 					obj.addProperty("message", "The input you provided is not valid");
 				}
+				Transaction.commit();
 			}
 		} catch (IOException e) {
 			e.printStackTrace();
 		} catch (RollbackException e) {
 			obj.addProperty("message", "The input you provided is not valid");
-		}
+		} finally {
+            if (Transaction.isActive()) Transaction.rollback(); 
+        }
 		return obj.toString();
 	}
 }	

@@ -8,6 +8,7 @@ import javax.servlet.http.HttpSession;
 
 import org.genericdao.MatchArg;
 import org.genericdao.RollbackException;
+import org.genericdao.Transaction;
 
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
@@ -48,15 +49,6 @@ public class BuyFund extends Action{
             return obj.toString();
         }
 		
-		long time = (long) session.getAttribute("time");
-		if(System.currentTimeMillis() > time + 900000) {
-			session.setAttribute("customer", null);
-			session.setAttribute("employee", null);
-			obj.addProperty("message", "You are not currently logged in");
-            return obj.toString();
-		}
-		session.setAttribute("time", System.currentTimeMillis());
-		
 		// if someone is there but not customer.
 		if (session.getAttribute("customer") == null ) {
 			obj.addProperty("message", "You must be a customer to perform this action");
@@ -78,6 +70,8 @@ public class BuyFund extends Action{
 				return obj.toString();
 			}
 			
+			Transaction.begin();
+			
 			String username = (String) session.getAttribute("customer"); 
 			//use CustomeDAO to get customer bean
 			Customer customer = customerDAO.read(username);
@@ -85,6 +79,7 @@ public class BuyFund extends Action{
 			if (customer.getCash() < Double.parseDouble(form.getCashValue())) {
 				obj.addProperty("message", "You don't have enough cash in your account to make this purchase");
 				System.out.println(obj.toString());
+				Transaction.commit();
 				return obj.toString();
 			}
 			
@@ -92,6 +87,7 @@ public class BuyFund extends Action{
 			if (fund == null) {
 				obj.addProperty("message", "The input you provided is not valid");
 				System.out.println("fund doesn't exist: " + obj.toString());
+				Transaction.commit();
 				return obj.toString();
 			}
 			
@@ -104,6 +100,7 @@ public class BuyFund extends Action{
 			
 				obj.addProperty("message", "You didn't provide enough cash to make this purchase");
 				System.out.println(obj.toString());
+				Transaction.commit();
 				return obj.toString();
 			}
 			
@@ -128,6 +125,7 @@ public class BuyFund extends Action{
 			}
 			
 			obj.addProperty("message", "The fund has been successfully purchased");
+			Transaction.commit();
 			
 		} catch (IOException e) {
 			obj.addProperty("message", "The input you provided is not valid");
@@ -135,7 +133,9 @@ public class BuyFund extends Action{
 			obj.addProperty("message", "The input you provided is not valid");
 		} catch (NullPointerException e) {
 			obj.addProperty("message", "The input you provided is not valid");
-		}
+		} finally {
+            if (Transaction.isActive()) Transaction.rollback(); 
+        }
 		System.out.println(obj.toString());
 		return obj.toString();
 	}

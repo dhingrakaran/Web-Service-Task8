@@ -37,15 +37,6 @@ public class CreateFund extends Action{
 			return obj.toString();
 		}
 		
-		long time = (long) session.getAttribute("time");
-		if(System.currentTimeMillis() > time + 900000) {
-			session.setAttribute("customer", null);
-			session.setAttribute("employee", null);
-			obj.addProperty("message", "You are not currently logged in");
-            return obj.toString();
-		}
-		session.setAttribute("time", System.currentTimeMillis());
-		
 		if(session.getAttribute("employee") == null) {
 			obj.addProperty("message", "You must be an employee to perform this action");
 			return obj.toString();
