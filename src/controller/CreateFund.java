@@ -70,8 +70,7 @@ public class CreateFund extends Action{
 	            Date dateobj = new Date(System.currentTimeMillis());
 	            fund.setCreate_fund_date(dateobj);
 	            fundDAO.create(fund);
-				obj.addProperty("message", "The fund was successfully created");//this is not mentioned in the spec so not sure 
-				//if this message should be given as a json object
+				obj.addProperty("message", "The fund was successfully created");
 			}
 		} catch (IOException e) {
 			e.printStackTrace();
