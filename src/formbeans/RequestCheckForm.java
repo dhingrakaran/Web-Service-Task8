@@ -34,6 +34,12 @@ public class RequestCheckForm extends FormBean {
 		} catch (NumberFormatException e) {
 			return true;
 		}
+		
+		if (Double.parseDouble(cashValue) <= 0.00) return true;
+		
+		if(Double.parseDouble(cashValue) != Math.round(Double.parseDouble(cashValue) * 100.0) / 100.0) {
+			return true;
+		}
 
 		return false;
 	}

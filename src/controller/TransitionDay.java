@@ -3,6 +3,7 @@ package controller;
 import java.util.Random;
 
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpSession;
 
 import org.genericdao.RollbackException;
 import org.genericdao.Transaction;
@@ -27,13 +28,14 @@ public class TransitionDay extends Action {
 	public String perform(HttpServletRequest request) {
 		JsonObject obj = new JsonObject();
 		Random random = new Random();
+		HttpSession session = request.getSession();
 		
-		if(request.getSession().getAttribute("employee") == null && request.getSession().getAttribute("customer") == null) {
+		if(session.getAttribute("employee") == null && session.getAttribute("customer") == null) {
 			obj.addProperty("message", "You are not currently logged in");
 			return obj.toString();
 		}
 		
-		if(request.getSession().getAttribute("employee") == null) {
+		if(session.getAttribute("employee") == null) {
 			obj.addProperty("message", "You must be an employee to perform this action");
 			return obj.toString();
 		}
@@ -43,7 +45,7 @@ public class TransitionDay extends Action {
 			
 			Fund funds[] = fundDAO.match();
 			for(int i = 0; i < funds.length; ++i) {
-				int randomValue = random.nextInt(21) - 10;
+				int randomValue = random.nextInt(21) - 10;				
 				double change = 100.0 + randomValue; 
 				change /= 100;
 				double newValue = funds[i].getInitial_value() * change;

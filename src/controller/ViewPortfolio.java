@@ -53,6 +53,7 @@ public class ViewPortfolio extends Action{
         
         try {
             Position[] positions = positionDAO.match(MatchArg.equals("username", (String) session.getAttribute("customer")));
+            double cash = customerDAO.read((String) session.getAttribute("customer")).getCash();
             if (positions.length == 0) {
                 mainObj.addProperty("message", "You don't have any funds in your Portfolio");
                 return mainObj.toString();
@@ -71,7 +72,6 @@ public class ViewPortfolio extends Action{
                 jArray.add(obj);
             }
             
-            double cash = customerDAO.read(session.getAttribute("customer")).getCash();
             mainObj.addProperty("message", "The action was successful");
             mainObj.addProperty("cash", formatter.format(cash));
             mainObj.add("funds", jArray);

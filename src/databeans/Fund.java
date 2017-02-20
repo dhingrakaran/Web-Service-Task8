@@ -1,12 +1,15 @@
 package databeans;
 
+import java.sql.Date;
+
 import org.genericdao.PrimaryKey;
 
 @PrimaryKey ("symbol")
 public class Fund {
 	private String symbol = null;
 	private String name = null;
-	private double initial_value; 
+	private double initial_value;
+	private Date create_fund_date;
 	
 	public String getName() {
 		return name;
@@ -20,6 +23,14 @@ public class Fund {
 		return symbol;
 	}
 	
+	public Date getCreate_fund_date() {
+		return create_fund_date;
+	}
+
+	public void setCreate_fund_date(Date create_fund_date) {
+		this.create_fund_date = create_fund_date;
+	}
+
 	public void setSymbol(String symbol) {
 		this.symbol = symbol;
 	}
@@ -31,4 +42,5 @@ public class Fund {
 	public void setInitial_value(double initial_value) {
 		this.initial_value = initial_value;
 	}
+	
 }

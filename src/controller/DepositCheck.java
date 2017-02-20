@@ -4,8 +4,10 @@ import java.io.BufferedReader;
 import java.io.IOException;
 
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpSession;
 
 import org.genericdao.RollbackException;
+import org.genericdao.Transaction;
 
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
@@ -30,13 +32,14 @@ public class DepositCheck extends Action{
 		JsonObject obj = new JsonObject();
 		BufferedReader br;
 		String line;
+		HttpSession session = request.getSession();
 		
-		if(request.getSession().getAttribute("employee")== null && request.getSession().getAttribute("customer") == null){
+		if(session.getAttribute("employee") == null && session.getAttribute("customer") == null) {
 			obj.addProperty("message", "You are not currently logged in");
 			return obj.toString();
 		}
 		
-		if(request.getSession().getAttribute("employee") == null) {
+		if(session.getAttribute("employee") == null) {
 			obj.addProperty("message", "You must be an employee to perform this action");
 			return obj.toString();
 		}
@@ -49,16 +52,25 @@ public class DepositCheck extends Action{
 			if (form.hasErrors()) {
 				obj.addProperty("message", "The input you provided is not valid");
 			} else {
+				Transaction.begin();
 				Customer customer = customerDAO.read(form.getUsername());
-				customer.setCash(customer.getCash() + Double.parseDouble(form.getCash()));
-				customerDAO.update(customer);
-				obj.addProperty("message", "The check was successfully deposited");
+				if(customer != null) {
+					customer.setCash(customer.getCash() + Double.parseDouble(form.getCash()));
+					customerDAO.update(customer);
+					obj.addProperty("message", "The check was successfully deposited");	
+				}
+				else {
+					obj.addProperty("message", "The input you provided is not valid");
+				}
+				Transaction.commit();
 			}
 		} catch (IOException e) {
 			e.printStackTrace();
 		} catch (RollbackException e) {
 			obj.addProperty("message", "The input you provided is not valid");
-		}
+		} finally {
+            if (Transaction.isActive()) Transaction.rollback(); 
+        }
 		return obj.toString();
 	}
 }	

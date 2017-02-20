@@ -59,7 +59,7 @@ public class Login extends Action{
 		} catch (RollbackException e) {
 			e.printStackTrace();
 		}
-		System.out.println(obj.toString());
+		//System.out.println(obj.toString());
 		return obj.toString();
 		
 	}
