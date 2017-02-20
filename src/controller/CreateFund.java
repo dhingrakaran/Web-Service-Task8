@@ -54,7 +54,7 @@ public class CreateFund extends Action{
 				obj.addProperty("message", "The input you provided is not valid");
 			} else {
 				Fund fund = new Fund();
-	            fund.setName(form.getName().toUpperCase());
+	            fund.setName(form.getName());
 	            fund.setSymbol(form.getSymbol().toUpperCase());
 	            fund.setInitial_value(Double.parseDouble(form.getInitial_value()));
 	            fundDAO.create(fund);
