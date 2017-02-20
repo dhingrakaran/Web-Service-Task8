@@ -2,6 +2,8 @@ package controller;
 
 import java.io.BufferedReader;
 import java.io.IOException;
+import java.sql.Date;
+
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
 
@@ -25,7 +27,7 @@ public class CreateFund extends Action{
 	public String getName() {
 		return "createFund";
 	}
-
+	
 	public String perform (HttpServletRequest request) {
 		JsonObject obj = new JsonObject();
 		BufferedReader br;
@@ -65,6 +67,8 @@ public class CreateFund extends Action{
 	            fund.setName(form.getName());
 	            fund.setSymbol(form.getSymbol());
 	            fund.setInitial_value(Double.parseDouble(form.getInitial_value()));
+	            Date dateobj = new Date(System.currentTimeMillis());
+	            fund.setCreate_fund_date(dateobj);
 	            fundDAO.create(fund);
 				obj.addProperty("message", "The fund was successfully created");//this is not mentioned in the spec so not sure 
 				//if this message should be given as a json object
