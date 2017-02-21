@@ -55,11 +55,10 @@ public class Login extends Action{
 				}
 			}
 		} catch (IOException e) {
-			e.printStackTrace();
+			obj.addProperty("message", "There seems to be an issue with the username/password combination that you entered");
 		} catch (RollbackException e) {
-			e.printStackTrace();
+			obj.addProperty("message", "There seems to be an issue with the username/password combination that you entered");
 		}
-		//System.out.println(obj.toString());
 		return obj.toString();
 		
 	}

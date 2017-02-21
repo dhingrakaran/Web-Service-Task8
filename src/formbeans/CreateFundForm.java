@@ -55,6 +55,10 @@ public class CreateFundForm extends FormBean{
         	return true;
         }
         
+        if(Double.parseDouble(initial_value) != Math.round(Double.parseDouble(initial_value) * 100.0) / 100.0) {
+			return true;
+		}
+        
         return false;
     }
 }

@@ -64,11 +64,11 @@ public class CreateFund extends Action{
 				obj.addProperty("message", "The fund was successfully created");
 			}
 		} catch (IOException e) {
-			e.printStackTrace();
+			obj.addProperty("message", "The input you provided is not valid");
 		} catch(DuplicateKeyException e) {
 			obj.addProperty("message", "The input you provided is not valid");
 		} catch (RollbackException e) {
-			e.printStackTrace();
+			obj.addProperty("message", "The input you provided is not valid");
 		}
 		return obj.toString();	
 	}

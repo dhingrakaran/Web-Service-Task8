@@ -61,7 +61,7 @@ public class TransitionDay extends Action {
 			
 			Transaction.commit();
 		} catch (RollbackException e) {
-			e.printStackTrace();
+			obj.addProperty("message", "The fund prices have been successfully recalculated");
 		} finally {
             if (Transaction.isActive()) Transaction.rollback(); 
         }

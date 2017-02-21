@@ -39,6 +39,10 @@ public class SellFundForm extends FormBean{
             return true;
         }
 		
+		if(Integer.parseInt(numShares) <= 0){
+			return true;
+		}
+		
 		return false;
 	}
 }

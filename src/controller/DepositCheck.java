@@ -65,7 +65,7 @@ public class DepositCheck extends Action{
 				Transaction.commit();
 			}
 		} catch (IOException e) {
-			e.printStackTrace();
+			obj.addProperty("message", "The input you provided is not valid");
 		} catch (RollbackException e) {
 			obj.addProperty("message", "The input you provided is not valid");
 		} finally {

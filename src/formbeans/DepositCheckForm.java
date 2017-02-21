@@ -38,6 +38,10 @@ public class DepositCheckForm extends FormBean{
         	return true;
         }
         
+        if(Double.parseDouble(cash) <= 0) {
+        	return true;
+        }
+        
         if(Double.parseDouble(cash) != Math.round(Double.parseDouble(cash) * 100) / 100) {
 			return true;
 		}
