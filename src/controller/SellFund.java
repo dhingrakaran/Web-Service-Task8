@@ -44,14 +44,12 @@ public class SellFund extends Action{
 		
 		if (session.getAttribute("customer") == null && session.getAttribute("employee") == null) {
             obj.addProperty("message", "You are not currently logged in");
-            System.out.println("not own fund: " + obj.toString());
             return obj.toString();
         }
 		
 		//if someone is there but not customer.
 		if (session.getAttribute("customer") == null) {
 			obj.addProperty("message", "You must be a customer to perform this action");
-			System.out.println("not own fund: " + obj.toString());
 			return obj.toString();
 		}
 		
@@ -64,9 +62,7 @@ public class SellFund extends Action{
 
 			if (form.hasErrors()) {
 				obj.addProperty("message", "The input you provided is not valid");
-				System.out.println("form errors: " + obj.toString());
 				return obj.toString();
-				
 			}
 			
 			Transaction.begin();
@@ -80,7 +76,6 @@ public class SellFund extends Action{
 				// customer doesn't own this fund.
 				
 				obj.addProperty("message", "The input you provided is not valid");
-				System.out.println("not own fund: " + obj.toString());
 				Transaction.commit();
 				return obj.toString();
 			}
@@ -88,9 +83,7 @@ public class SellFund extends Action{
 			int noofSellableFund = Integer.parseInt(form.getNumShares());
 			
 			if (position[0].getShares() < noofSellableFund) {
-				System.out.println("do not have enough shares");
 				obj.addProperty("message", "You don't have that many shares in your portfolio");
-				System.out.println(obj.toString());
 				Transaction.commit();
 				return obj.toString();
 			}
@@ -101,7 +94,6 @@ public class SellFund extends Action{
 			customerDAO.update(customer); 
 			
 			if (noofSellableFund == position[0].getShares()) {
-				System.out.println("sell all shares");
 				positionDAO.delete(position[0].getUsername(), position[0].getSymbol());
 			} else {
 				int newShare = position[0].getShares() - noofSellableFund;
@@ -109,7 +101,7 @@ public class SellFund extends Action{
 				positionDAO.update(position[0]);
 			}
 			
-			obj.addProperty("message", "The fund has been successfully sold");
+			obj.addProperty("message", "The shares have been successfully sold");
 			
 			Transaction.commit();
 			
@@ -120,7 +112,6 @@ public class SellFund extends Action{
 		} finally {
             if (Transaction.isActive()) Transaction.rollback(); 
         }
-		System.out.println(obj.toString());
 		return obj.toString();
 	}
 }

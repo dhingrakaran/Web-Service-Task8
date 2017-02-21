@@ -8,6 +8,7 @@ import javax.servlet.http.HttpSession;
 
 import org.genericdao.MatchArg;
 import org.genericdao.RollbackException;
+import org.genericdao.Transaction;
 
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
@@ -52,10 +53,13 @@ public class ViewPortfolio extends Action{
         }
         
         try {
+        	Transaction.begin();
+        	
             Position[] positions = positionDAO.match(MatchArg.equals("username", (String) session.getAttribute("customer")));
             double cash = customerDAO.read((String) session.getAttribute("customer")).getCash();
             if (positions.length == 0) {
                 mainObj.addProperty("message", "You don't have any funds in your Portfolio");
+                Transaction.commit();
                 return mainObj.toString();
             }
             
@@ -76,8 +80,12 @@ public class ViewPortfolio extends Action{
             mainObj.addProperty("cash", formatter.format(cash));
             mainObj.add("funds", jArray);
             
+            Transaction.commit();
+            
         } catch (RollbackException e) {
             e.printStackTrace(); 
+        } finally {
+            if (Transaction.isActive()) Transaction.rollback(); 
         }
         
         return mainObj.toString();
